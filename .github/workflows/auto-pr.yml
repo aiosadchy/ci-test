@@ -22,9 +22,19 @@ jobs:
                           : null;
             core.info(release);
 
-            const release_list = ['latest_release'];
+            const release_list = [];
 
-
+            const exec_options = {};
+            exec_options.listeners = {
+              stdline: (data) => {
+                release_list.push(data);
+              }
+            };
+            await exec.exec(
+              'git',
+              ['branch', '--list=release/*', '--sort=-refname', '--no-color'],
+              exec_options
+            );
 
             core.info(release_list);
 
