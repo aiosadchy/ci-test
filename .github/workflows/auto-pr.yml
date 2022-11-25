@@ -15,7 +15,7 @@ jobs:
         with:
           script: |
             const { owner, repo } = context.repo;
-            const branch = '${{ github.ref_name }}'
+            const branch = '${{ github.ref_name }}';
             core.info(branch);
             const release = branch.toLowerCase().startsWith('release/')
                           ? branch.substring('release/'.length)
@@ -23,15 +23,15 @@ jobs:
             core.info(release);
 
             const release_list = [];
+            const exec_options = {};
+            options.listeners = {
+              stdline: (data: string) => {
+                release_list.push(data);
+              }
+            };
             await exec.exec(
               'git branch --list=release/* --sort=-refname --no-color',
-              options: {
-                listeners: {
-                  stdline: (data: string) => {
-                    release_list.push(data);
-                  }
-                }
-              }
+              options: exec_options
             );
 
             core.info(release_list);
