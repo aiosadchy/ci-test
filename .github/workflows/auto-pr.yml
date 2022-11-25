@@ -62,3 +62,5 @@ jobs:
               body:   'This pull request is auto-generated.',
               draft:  create_draft
             });
+
+            core.info('is this line even being executed?');
