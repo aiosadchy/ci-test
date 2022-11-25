@@ -26,16 +26,17 @@ jobs:
             core.info(release);
 
             const release_list = [];
+
+            const exec_options = {};
+            exec_options.listeners = {
+              stdline: (data) => {
+                release_list.push(data);
+              }
+            };
             await exec.exec(
               'git',
               ['branch', '--list=release/*', '--sort=-refname', '--no-color'],
-              {
-                listeners: {
-                  stdline: (data) => {
-                    release_list.push(data);
-                  }
-                };
-              }
+              exec_options
             );
 
             core.info(release_list);
