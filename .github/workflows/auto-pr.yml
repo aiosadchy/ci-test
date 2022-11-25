@@ -53,14 +53,17 @@ jobs:
             const base_branch = release ? 'master' : latest_release;
             const create_draft = (!!release);
 
-            const result = await github.rest.pulls.create({
-              owner,
-              repo,
-              title:  branch,
-              head:   branch,
-              base:   base_branch,
-              body:   'This pull request is auto-generated.',
-              draft:  create_draft
-            });
+            try {
+              const result = await github.rest.pulls.create({
+                owner,
+                repo,
+                title:  branch,
+                head:   branch,
+                base:   base_branch,
+                body:   'This pull request is auto-generated.',
+                draft:  create_draft
+              });
+            } catch(e) {
+              core.info(e.message);
+            }
 
-            core.info('is this line even being executed?');
