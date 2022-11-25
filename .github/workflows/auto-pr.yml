@@ -23,6 +23,7 @@ jobs:
             core.info(release);
 
             const release_list = [];
+
             const exec_options = {};
             options.listeners = {
               stdline: (data: string) => {
@@ -30,8 +31,9 @@ jobs:
               }
             };
             await exec.exec(
-              'git branch --list=release/* --sort=-refname --no-color',
-              options: exec_options
+              'git',
+              ['branch', '--list=release/*', '--sort=-refname', '--no-color'],
+              exec_options
             );
 
             core.info(release_list);
