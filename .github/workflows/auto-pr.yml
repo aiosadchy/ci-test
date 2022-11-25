@@ -35,7 +35,12 @@ jobs:
             };
             await exec.exec(
               'git',
-              ['branch', '--no-color'],
+              [
+                'for-each-ref',
+                '--format="%(refname:short)"',
+                '--sort=-refname',
+                'refs/heads/release/'
+              ],
               exec_options
             );
 
