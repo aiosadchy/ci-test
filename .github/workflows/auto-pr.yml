@@ -64,6 +64,9 @@ jobs:
                 draft:  create_draft
               });
             } catch(e) {
-              core.info(e.message.message);
+              const message = e.message;
+              if (message.toLowerCase().search('validation') == -1) {
+                throw e;
+              }
+              core.info(e.message);
             }
-
