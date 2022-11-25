@@ -64,10 +64,6 @@ jobs:
                 draft:  create_draft
               });
             } catch(e) {
-              if (e instanceof HttpError) {
-                core.info(e.message.message);
-              } else {
-                throw e;
-              }
+              core.info(e.message.message);
             }
 
