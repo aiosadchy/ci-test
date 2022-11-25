@@ -10,6 +10,9 @@ jobs:
   create-pull-request:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Automatically Create Pull Request
         uses: actions/github-script@v6
         with:
@@ -23,17 +26,16 @@ jobs:
             core.info(release);
 
             const release_list = [];
-
-            const exec_options = {};
-            exec_options.listeners = {
-              stdline: (data) => {
-                release_list.push(data);
-              }
-            };
             await exec.exec(
               'git',
               ['branch', '--list=release/*', '--sort=-refname', '--no-color'],
-              exec_options
+              {
+                listeners: {
+                  stdline: (data) => {
+                    release_list.push(data);
+                  }
+                };
+              }
             );
 
             core.info(release_list);
