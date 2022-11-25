@@ -25,7 +25,7 @@ jobs:
             const release_list = [];
 
             const exec_options = {};
-            options.listeners = {
+            exec_options.listeners = {
               stdline: (data: string) => {
                 release_list.push(data);
               }
@@ -42,12 +42,15 @@ jobs:
 
             core.info(latest_release);
 
+            const base_branch = release ? 'master' : latest_release;
+            const create_draft = (!!release);
+
             const result = await github.rest.pulls.create({
               owner,
               repo,
               title:  branch,
               head:   branch,
-              base:   (release ? 'master' : latest_release),
+              base:   base_branch,
               body:   'This pull request is auto-generated.',
-              draft:  (!!release)
+              draft:  create_draft
             });
