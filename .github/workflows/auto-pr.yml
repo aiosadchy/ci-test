@@ -63,7 +63,7 @@ jobs:
                 body:   'This pull request is auto-generated.',
                 draft:  create_draft
               });
-            } catch(e) {
-              core.info(e.message);
+            } catch(e: HttpError) {
+              core.info(e.message.message);
             }
 
