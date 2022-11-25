@@ -35,7 +35,7 @@ jobs:
             };
             await exec.exec(
               'git',
-              ['branch', '--list=release/*', '--sort=-refname', '--no-color'],
+              ['branch', '--no-color'],
               exec_options
             );
 
