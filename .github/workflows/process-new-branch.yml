@@ -1,8 +1,7 @@
 name: Process New Branch
 
 on:
-  # create:
-  push:
+  create:
     branches-ignore:
       - 'junk/*'
 
