@@ -29,6 +29,7 @@ jobs:
             mv .version.new .version
             git config --global user.name '${{ github.actor }}'
             git config --global user.email '${{ github.actor }}@users.noreply.github.com'
+            git checkout -b "workflow/update-version-for-release-$(cat .version)"
             git add .version
             git commit -m "[auto] Update .version for a new release branch."
             git push
