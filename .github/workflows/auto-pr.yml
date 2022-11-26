@@ -23,23 +23,27 @@ jobs:
             const is_release_pr = branch.toLowerCase().startsWith('release/');
 
             const get_release_list = async () => {
-              const release_list = [];
+              const branches_list = [];
               const exec_options = {};
               exec_options.listeners = {
                 stdline: (data) => {
-                  release_list.push(data.trim());
+                  branches_list.push(data.trim());
                 }
               };
               await exec.exec(
                 'git',
                 [
-                  'for-each-ref',
+                  'branch',
+                  '--remotes',
                   '--format="%(refname:short)"',
-                  'refs/remotes/origin/release/'
+                  '--no-color'
                 ],
                 exec_options
               );
-              return release_list;
+              core.info(branches_list)
+              return branches_list.filter(
+                (s) => (s.toLowerCase().search('release/') != -1)
+              );
             };
 
             const get_latest_release = async () => {
