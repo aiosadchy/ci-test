@@ -1,4 +1,4 @@
-name: Auto Pull Request
+name: Create Pull Request
 
 on:
   push:
@@ -13,40 +13,46 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Automatically Create Pull Request
+      - name: Create Pull Request
         uses: actions/github-script@v6
         with:
           script: |
+            const get_release_list = async () => {
+              const release_list = [];
+              const exec_options = {};
+              exec_options.listeners = {
+                stdline: (data) => {
+                  release_list.push(data);
+                }
+              };
+              await exec.exec(
+                'git',
+                [
+                  'for-each-ref',
+                  '--format="%(refname:short)"',
+                  'refs/heads/release/'
+                ],
+                exec_options
+              );
+              core.info("release list is:");
+              core.info(release_list);
+              return release_list;
+            };
+
             const { owner, repo } = context.repo;
             const branch = '${{ github.ref_name }}';
             core.info(branch);
             const release = branch.toLowerCase().startsWith('release/')
                           ? branch.substring('release/'.length)
                           : null;
-            core.info(release);
 
-            const release_list = [];
-
-            const exec_options = {};
-            exec_options.listeners = {
-              stdline: (data) => {
-                release_list.push(data);
-              }
-            };
-            await exec.exec(
-              'git',
-              [
-                'for-each-ref',
-                '--format="%(refname:short)"',
-                '--sort=-refname',
-                'refs/heads/release/'
-              ],
-              exec_options
-            );
+            const release_list = await get_release_list();
 
             core.info(release_list);
 
-            const latest_release = release_list[0];
+            const latest_release = release_list.sort(
+                (a, b) => a.localeCompare(b, undefined, { numeric:true })
+            );
 
             core.info(latest_release);
 
@@ -68,5 +74,4 @@ jobs:
               if (message.toLowerCase().search('validation') == -1) {
                 throw e;
               }
-              core.info(e.message);
             }
