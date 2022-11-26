@@ -1,10 +1,10 @@
 name: Create Pull Request
 
 on:
-  create:
+  push:
     branches:
-      - release/*
-      - feature/*
+      - '*'
+      - '!${{ github.event.repository.default_branch }}'
 
 jobs:
   create-pull-request:
@@ -13,86 +13,53 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Fetch Remote Branches
+        run: |
+          git fetch --all --depth=1
+          git fetch origin ${{ github.event.repository.default_branch }}
+
+      - name: Find Latest Release Branch
+        id: latest-release-finder
+        run: |
+          export MASTER_BRANCH="${{ github.event.repository.default_branch }}"
+          git                                       \
+              for-each-ref                          \
+              -format="%(refname:short)"            \
+              --no-merged=origin/${MASTER_BRANCH}   \
+              'refs/remotes/origin/release/'        \
+          | sort --version-sort --reverse           \
+          | ( cut -c 8-; echo "${MASTER_BRANCH}" )  \
+          | ( echo -n "NAME=" ; head -n 1 )         \
+          >> "$GITHUB_OUTPUT"
+
       - name: Create Pull Request
         uses: actions/github-script@v6
         with:
           script: |
             const { owner, repo } = context.repo;
-            const branch = '${{ github.ref_name }}';
-            const master_branch = '${{ github.event.repository.default_branch }}'
-            const is_release_pr = branch.toLowerCase().startsWith('release/');
-
-            const fetch_all_branches = async () => {
-              await exec.exec('git', ['fetch', '--all', '--depth=1']);
-            }
-
-            const get_release_list = async () => {
-              await fetch_all_branches();
-              const branches_list = [];
-              const exec_options = {};
-              exec_options.listeners = {
-                stdline: (data) => {
-                  branches_list.push(data.trim());
-                }
-              };
-              await exec.exec(
-                'git',
-                [
-                  'for-each-ref',
-                  '--format=%(refname)',
-                  'refs/remotes/origin/release/'
-                ],
-                exec_options
-              );
-              return branches_list.map(
-                s => s.substring('refs/remotes/origin/'.length)
-              );
-            };
-
-            const get_latest_release = async () => {
-              const release_list = await get_release_list();
-              release_list.sort(
-                  (a, b) => b.localeCompare(a, undefined, { numeric:true })
-              );
-              core.info('Release branches are:');
-              core.info(
-                String(
-                  (release_list.length > 0)
-                  ? release_list
-                  : '<none>'
-                )
-              );
-              if (release_list.length > 0) {
-                const latest_release = release_list[0];
-                core.info('Latest release branch is ' + String(latest_release));
-                return latest_release;
-              }
-              return master_branch;
-            };
-
-            const base_branch = is_release_pr
-                              ? master_branch
-                              : await get_latest_release();
+            const head = '${{ github.ref_name }}';
+            const is_release_pr = head.toLowerCase().startsWith('release/');
+            const base = is_release_pr
+                       ? '${{ github.event.repository.default_branch }}'
+                       : '${{ steps.latest-release-finder.outputs.NAME }}';
 
             core.info('Attempting to create pull request.');
-            core.info('Head branch is: ' + String(branch));
-            core.info('Base branch is: ' + String(base_branch));
+            core.info('Head branch is: ' + String(head));
+            core.info('Base branch is: ' + String(base));
 
             try {
               const result = await github.rest.pulls.create({
                 owner,
                 repo,
-                title:  branch,
-                head:   branch,
-                base:   base_branch,
+                title:  head,
+                head:   head,
+                base:   base,
                 body:   'This pull request is auto-generated.',
                 draft:  is_release_pr
               });
-            } catch(e) {
-              const message = e.message;
-              if (message.toLowerCase().search('already exists') == -1) {
-                throw e;
-              } else {
-                core.info('Such pull request already exists.');
+            } catch(error) {
+              if (error.message.toLowerCase().search('already exists') != -1) {
+                throw error;
               }
+              core.info('Such pull request already exists.');
             }
