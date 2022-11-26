@@ -17,6 +17,11 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            const { owner, repo } = context.repo;
+            const branch = '${{ github.ref_name }}';
+            const master_branch = 'master'
+            const is_release_pr = branch.toLowerCase().startsWith('release/');
+
             const get_release_list = async () => {
               const release_list = [];
               const exec_options = {};
@@ -34,30 +39,33 @@ jobs:
                 ],
                 exec_options
               );
-              core.info("release list is:");
-              core.info(release_list);
               return release_list;
             };
 
-            const { owner, repo } = context.repo;
-            const branch = '${{ github.ref_name }}';
-            core.info(branch);
-            const release = branch.toLowerCase().startsWith('release/')
-                          ? branch.substring('release/'.length)
-                          : null;
+            const get_latest_release = async () => {
+              const release_list = await get_release_list();
+              release_list.sort(
+                  (a, b) => b.localeCompare(a, undefined, { numeric:true })
+              );
+              core.info('Release branches are:');
+              core.info(((release_list.length > 0)
+                        ? release_list_sorted
+                        : '<none>')
+              );
+              if (release_list.length > 0) {
+                const latest_release = release_list[0];
+                core.info('Latest release branch is ${latest_release}.');
+                return latest_release;
+              }
+              return master_branch;
+            };
 
-            const release_list = await get_release_list();
+            const base_branch = is_release_pr
+                              ? master_branch
+                              : await get_latest_release();
 
-            core.info(release_list);
-
-            const latest_release = release_list.sort(
-                (a, b) => a.localeCompare(b, undefined, { numeric:true })
-            );
-
-            core.info(latest_release);
-
-            const base_branch = release ? 'master' : latest_release;
-            const create_draft = (!!release);
+            core.info('Attempting to create pull request.');
+            core.info('Base branch is ${base_branch}.');
 
             try {
               const result = await github.rest.pulls.create({
@@ -67,11 +75,14 @@ jobs:
                 head:   branch,
                 base:   base_branch,
                 body:   'This pull request is auto-generated.',
-                draft:  create_draft
+                draft:  is_release_pr
               });
             } catch(e) {
               const message = e.message;
               if (message.toLowerCase().search('validation') == -1) {
+                core.error('Unhandled error: ${e}.');
                 throw e;
+              } else {
+                core.info('Such pull request already exists.');
               }
             }
