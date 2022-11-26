@@ -1,6 +1,9 @@
 name: Create Pull Request
 
-on: create
+on:
+  create:
+    branches:
+      - '!${{ github.event.repository.default_branch }}'
 
 jobs:
   create-pull-request:
@@ -20,6 +23,7 @@ jobs:
 
             const fetch_all_branches = async () => {
               await exec.exec('git', ['fetch', '--all', '--depth=1']);
+              await exec.exec('git', ['fetch', 'origin', master_branch]);
             }
 
             const get_release_list = async () => {
@@ -36,6 +40,7 @@ jobs:
                 [
                   'for-each-ref',
                   '--format=%(refname)',
+                  '--no-merged=origin/' + master_branch,
                   'refs/remotes/origin/release/'
                 ],
                 exec_options
