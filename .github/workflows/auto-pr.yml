@@ -68,7 +68,8 @@ jobs:
                               : await get_latest_release();
 
             core.info('Attempting to create pull request.');
-            core.info('Base branch is ' + String(base_branch));
+            core.info('Head branch is: ' + String(branch));
+            core.info('Base branch is: ' + String(base_branch));
 
             try {
               const result = await github.rest.pulls.create({
