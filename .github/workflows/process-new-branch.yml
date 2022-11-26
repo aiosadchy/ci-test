@@ -1,14 +1,17 @@
 name: Process New Branch
 
 on:
-  # create:
-  push:
+  create:
     branches-ignore:
       - 'junk/*'
 
 jobs:
   create-pull-request:
     runs-on: ubuntu-latest
+
+    env:
+      MASTER_BRANCH: '${{ github.event.repository.default_branch }}'
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -32,7 +35,6 @@ jobs:
       - name: Find Latest Release Branch
         id: latest-release
         run: |
-          export MASTER_BRANCH="${{ github.event.repository.default_branch }}"
           git for-each-ref                          \
               --format="%(refname:short)"           \
               --no-merged="origin/${MASTER_BRANCH}" \
