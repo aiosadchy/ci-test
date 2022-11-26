@@ -60,7 +60,7 @@ jobs:
               core.info(
                 String(
                   (release_list.length > 0)
-                  ? release_list_sorted
+                  ? release_list
                   : '<none>'
                 )
               );
