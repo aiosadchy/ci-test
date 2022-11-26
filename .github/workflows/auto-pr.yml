@@ -39,12 +39,14 @@ jobs:
                 'git',
                 [
                   'for-each-ref',
-                  '--format=%(refname:short)',
+                  '--format=%(refname)',
                   'refs/remotes/origin/release/'
                 ],
                 exec_options
               );
-              return branches_list;
+              return branches_list.map(
+                s => s.substring('refs/remotes/origin/'.length)
+              );
             };
 
             const get_latest_release = async () => {
@@ -89,7 +91,6 @@ jobs:
             } catch(e) {
               const message = e.message;
               if (message.toLowerCase().search('already exists') == -1) {
-                core.error('Unhandled error: ' + String(e));
                 throw e;
               } else {
                 core.info('Such pull request already exists.');
