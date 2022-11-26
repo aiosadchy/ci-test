@@ -54,7 +54,6 @@ jobs:
                 title:  head,
                 head:   head,
                 base:   base,
-                body:   'This pull request is auto-generated.',
                 draft:  is_release_pr
               });
             } catch(error) {
