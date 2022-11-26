@@ -1,10 +1,9 @@
-name: Create Pull Request
+name: Process New Branch
 
 on:
-  push:
-    branches:
-      - '*'
-      - '!${{ github.event.repository.default_branch }}'
+  create:
+    branches-ignore:
+      - 'junk/*'
 
 jobs:
   create-pull-request:
@@ -16,16 +15,16 @@ jobs:
       - name: Fetch Remote Branches
         run: |
           git fetch --all --depth=1
-          git fetch origin ${{ github.event.repository.default_branch }}
+          git fetch origin "${{ github.event.repository.default_branch }}"
 
       - name: Find Latest Release Branch
-        id: latest-release-finder
+        id: latest-release
         run: |
           export MASTER_BRANCH="${{ github.event.repository.default_branch }}"
           git                                       \
               for-each-ref                          \
-              -format="%(refname:short)"            \
-              --no-merged=origin/${MASTER_BRANCH}   \
+              --format="%(refname:short)"           \
+              --no-merged="origin/${MASTER_BRANCH}" \
               'refs/remotes/origin/release/'        \
           | sort --version-sort --reverse           \
           | ( cut -c 8-; echo "${MASTER_BRANCH}" )  \
@@ -41,7 +40,7 @@ jobs:
             const is_release_pr = head.toLowerCase().startsWith('release/');
             const base = is_release_pr
                        ? '${{ github.event.repository.default_branch }}'
-                       : '${{ steps.latest-release-finder.outputs.NAME }}';
+                       : '${{ steps.latest-release.outputs.NAME }}';
 
             core.info('Attempting to create pull request.');
             core.info('Head branch is: ' + String(head));
@@ -54,9 +53,9 @@ jobs:
                 title:  head,
                 head:   head,
                 base:   base,
-                body:   'This pull request is auto-generated.',
                 draft:  is_release_pr
               });
+              core.info('Success!');
             } catch(error) {
               if (error.message.toLowerCase().search('already exists') != -1) {
                 throw error;
