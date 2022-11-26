@@ -1,7 +1,8 @@
 name: Process New Branch
 
 on:
-  create:
+  # create:
+  push:
     branches-ignore:
       - 'junk/*'
 
@@ -11,6 +12,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Update Project Version
         if: ${{ startsWith(github.ref_name, 'release/') }}
@@ -25,11 +28,6 @@ jobs:
             git commit -m "[AUTO] Update .version for a new release branch."
             git push
           fi
-
-      - name: Fetch Remote Branches
-        run: |
-          git fetch --all --depth=1
-          git fetch origin "${{ github.event.repository.default_branch }}"
 
       - name: Find Latest Release Branch
         id: latest-release
