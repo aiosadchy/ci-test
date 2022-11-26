@@ -20,7 +20,7 @@ jobs:
           export MASTER_BRANCH="${{ github.event.repository.default_branch }}"
           git                                       \
               for-each-ref                          \
-              -format="%(refname:short)"            \
+              --format="%(refname:short)"           \
               --no-merged=origin/${MASTER_BRANCH}   \
               'refs/remotes/origin/release/'        \
           | sort --version-sort --reverse           \
