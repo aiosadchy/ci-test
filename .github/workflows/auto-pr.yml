@@ -38,16 +38,13 @@ jobs:
               await exec.exec(
                 'git',
                 [
-                  'branch',
-                  '--remotes',
+                  'for-each-ref',
                   '--format=%(refname:short)',
-                  '--no-color'
+                  'refs/remotes/origin/release/'
                 ],
                 exec_options
               );
-              return branches_list.filter(
-                (s) => (s.toLowerCase().search('release/') != -1)
-              );
+              return branches_list;
             };
 
             const get_latest_release = async () => {
