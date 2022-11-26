@@ -12,8 +12,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Create Pull Request
         uses: actions/github-script@v6
@@ -37,7 +35,7 @@ jobs:
                 [
                   'for-each-ref',
                   '--format="%(refname:short)"',
-                  'refs/heads/release/'
+                  'refs/remotes/origin/release/'
                 ],
                 exec_options
               );
