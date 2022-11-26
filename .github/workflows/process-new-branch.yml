@@ -1,12 +1,13 @@
 name: Process New Branch
 
 on:
-  create:
+  # create:
+  push:
     branches-ignore:
       - 'junk/*'
 
 jobs:
-  create-pull-request:
+  process-new-branch:
     runs-on: ubuntu-latest
 
     env:
@@ -27,8 +28,11 @@ jobs:
           > .version.new
           if [ -s .version.new ]; then
             mv .version.new .version
+            echo ${{ github.actor }}
+            git config --global user.name '${{ github.actor }}'
+            git config --global user.email '${{ github.actor }}@users.noreply.github.com'
             git add .version
-            git commit -m "[AUTO] Update .version for a new release branch."
+            git commit -m "[auto] Update .version for a new release branch."
             git push
           fi
 
