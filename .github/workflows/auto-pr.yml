@@ -22,7 +22,12 @@ jobs:
             const master_branch = '${{ github.event.repository.default_branch }}'
             const is_release_pr = branch.toLowerCase().startsWith('release/');
 
+            const fetch_all_branches = async () => {
+              await exec.exec('git', ['fetch', '--all']);
+            }
+
             const get_release_list = async () => {
+              await fetch_all_branches();
               const branches_list = [];
               const exec_options = {};
               exec_options.listeners = {
