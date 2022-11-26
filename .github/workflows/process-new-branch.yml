@@ -38,7 +38,6 @@ jobs:
       - name: Find Latest Release Branch
         id: latest-release
         run: |
-          echo ${{ github.actor }}
           git for-each-ref                          \
               --format="%(refname:short)"           \
               --no-merged="origin/${MASTER_BRANCH}" \
@@ -74,7 +73,7 @@ jobs:
               });
               core.info('Success!');
             } catch(error) {
-              if (error.message.toLowerCase().search('already exists') != -1) {
+              if (error.message.toLowerCase().search('already exists') == -1) {
                 throw error;
               }
               core.info('Such pull request already exists.');
