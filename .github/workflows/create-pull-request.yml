@@ -1,10 +1,6 @@
 name: Create Pull Request
 
-on:
-  create:
-    branches:
-      - release/*
-      - feature/*
+on: create
 
 jobs:
   create-pull-request:
