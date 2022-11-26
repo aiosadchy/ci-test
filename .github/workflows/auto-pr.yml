@@ -48,13 +48,16 @@ jobs:
                   (a, b) => b.localeCompare(a, undefined, { numeric:true })
               );
               core.info('Release branches are:');
-              core.info(((release_list.length > 0)
-                        ? release_list_sorted
-                        : '<none>')
+              core.info(
+                String(
+                  (release_list.length > 0)
+                  ? release_list_sorted
+                  : '<none>'
+                )
               );
               if (release_list.length > 0) {
                 const latest_release = release_list[0];
-                core.info('Latest release branch is ${{ latest_release }}.');
+                core.info('Latest release branch is ' + String(latest_release));
                 return latest_release;
               }
               return master_branch;
@@ -65,7 +68,7 @@ jobs:
                               : await get_latest_release();
 
             core.info('Attempting to create pull request.');
-            core.info('Base branch is ${{ base_branch }}.');
+            core.info('Base branch is ' + String(base_branch));
 
             try {
               const result = await github.rest.pulls.create({
@@ -80,7 +83,7 @@ jobs:
             } catch(e) {
               const message = e.message;
               if (message.toLowerCase().search('validation') == -1) {
-                core.error('Unhandled error: ${{ e }}.');
+                core.error('Unhandled error: ' + String(e));
                 throw e;
               } else {
                 core.info('Such pull request already exists.');
