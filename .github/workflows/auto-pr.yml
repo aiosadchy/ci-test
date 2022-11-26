@@ -40,7 +40,7 @@ jobs:
                 [
                   'branch',
                   '--remotes',
-                  '--format="%(refname:short)"',
+                  '--format=%(refname:short)',
                   '--no-color'
                 ],
                 exec_options
@@ -91,7 +91,7 @@ jobs:
               });
             } catch(e) {
               const message = e.message;
-              if (message.toLowerCase().search('validation') == -1) {
+              if (message.toLowerCase().search('already exists') == -1) {
                 core.error('Unhandled error: ' + String(e));
                 throw e;
               } else {
