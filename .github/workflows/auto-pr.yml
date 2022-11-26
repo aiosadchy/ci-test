@@ -23,7 +23,7 @@ jobs:
             const is_release_pr = branch.toLowerCase().startsWith('release/');
 
             const fetch_all_branches = async () => {
-              await exec.exec('git', ['fetch', '--all']);
+              await exec.exec('git', ['fetch', '--all', '--depth=1']);
             }
 
             const get_release_list = async () => {
@@ -45,7 +45,6 @@ jobs:
                 ],
                 exec_options
               );
-              core.info(branches_list)
               return branches_list.filter(
                 (s) => (s.toLowerCase().search('release/') != -1)
               );
