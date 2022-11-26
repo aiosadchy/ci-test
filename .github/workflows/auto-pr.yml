@@ -22,24 +22,31 @@ jobs:
             const master_branch = '${{ github.event.repository.default_branch }}'
             const is_release_pr = branch.toLowerCase().startsWith('release/');
 
+            const fetch_all_branches = async () => {
+              await exec.exec('git', ['fetch', '--all', '--depth=1']);
+            }
+
             const get_release_list = async () => {
-              const release_list = [];
+              await fetch_all_branches();
+              const branches_list = [];
               const exec_options = {};
               exec_options.listeners = {
                 stdline: (data) => {
-                  release_list.push(data.trim());
+                  branches_list.push(data.trim());
                 }
               };
               await exec.exec(
                 'git',
                 [
                   'for-each-ref',
-                  '--format="%(refname:short)"',
-                  'refs/heads/release/'
+                  '--format=%(refname)',
+                  'refs/remotes/origin/release/'
                 ],
                 exec_options
               );
-              return release_list;
+              return branches_list.map(
+                s => s.substring('refs/remotes/origin/'.length)
+              );
             };
 
             const get_latest_release = async () => {
@@ -51,7 +58,7 @@ jobs:
               core.info(
                 String(
                   (release_list.length > 0)
-                  ? release_list_sorted
+                  ? release_list
                   : '<none>'
                 )
               );
@@ -83,8 +90,7 @@ jobs:
               });
             } catch(e) {
               const message = e.message;
-              if (message.toLowerCase().search('validation') == -1) {
-                core.error('Unhandled error: ' + String(e));
+              if (message.toLowerCase().search('already exists') == -1) {
                 throw e;
               } else {
                 core.info('Such pull request already exists.');
