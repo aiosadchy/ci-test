@@ -28,7 +28,6 @@ jobs:
           > .version.new
           if [ -s .version.new ]; then
             mv .version.new .version
-            echo ${{ github.actor }}
             git config --global user.name '${{ github.actor }}'
             git config --global user.email '${{ github.actor }}@users.noreply.github.com'
             git add .version
@@ -39,6 +38,7 @@ jobs:
       - name: Find Latest Release Branch
         id: latest-release
         run: |
+          echo ${{ github.actor }}
           git for-each-ref                          \
               --format="%(refname:short)"           \
               --no-merged="origin/${MASTER_BRANCH}" \
