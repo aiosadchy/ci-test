@@ -27,12 +27,13 @@ jobs:
           > .version.new
           if [ -s .version.new ]; then
             mv .version.new .version
+            export BRANCH_NAME="workflow/update-version-for-release-$(cat .version)"
             git config --global user.name '${{ github.actor }}'
             git config --global user.email '${{ github.actor }}@users.noreply.github.com'
-            git checkout -b "workflow/update-version-for-release-$(cat .version)"
+            git checkout -b "${BRANCH_NAME}"
             git add .version
             git commit -m "[auto] Update .version for a new release branch."
-            git push
+            git push --set-upstream origin "${BRANCH_NAME}"
           fi
 
       - name: Find Latest Release Branch
