@@ -19,7 +19,7 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
             const branch = '${{ github.ref_name }}';
-            const master_branch = 'master'
+            const master_branch = '${{ github.event.repository.default_branch }}'
             const is_release_pr = branch.toLowerCase().startsWith('release/');
 
             const get_release_list = async () => {
